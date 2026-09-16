@@ -24,7 +24,7 @@ def run_training():
     config = AppConfig.load()
     setup_mlflow(config)
 
-    catalog_path = "data/metadata/catalog.csv"
+    catalog_path = config.data.catalog_path
     img_size = (config.data.image_height, config.data.image_width)
     channels = config.data.channels
     batch_size = config.data.batch_size

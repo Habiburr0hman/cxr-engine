@@ -10,6 +10,7 @@ mlflow:
     tracking_uri: "https://dagshub.com/Habiburr0hman/cxr-engine.mlflow"
 
 data:
+  catalog_path: "data/metadata/kermany_2018/catalog.csv"
   variant: "clahe_resized"
   image_height: 256
   image_width: 256

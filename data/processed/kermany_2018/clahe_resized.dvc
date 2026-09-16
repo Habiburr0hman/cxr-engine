@@ -1,0 +1,6 @@
+outs:
+- md5: 476af55ed77a077161a50104f23d7b60.dir
+  size: 183339319
+  nfiles: 5856
+  hash: md5
+  path: clahe_resized

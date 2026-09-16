@@ -3,7 +3,7 @@ import pandas as pd
 from src.constants import BINARY_TARGET_MAP, DATA_DIR, MULTI_TARGET_MAP
 from src.utils import get_project_relative_path
 
-RAW_DATA_DIR = DATA_DIR / "raw" / "chest_xray"
+RAW_DATA_DIR = DATA_DIR / "raw" / "kermany_2018"
 
 records = []
 for img_path in RAW_DATA_DIR.rglob("*.jpeg"):
@@ -31,7 +31,7 @@ df = pd.DataFrame(records)
 df["label"] = df["class"].map(BINARY_TARGET_MAP)
 df["sublabel"] = df["subclass"].map(MULTI_TARGET_MAP)
 
-output_dir = DATA_DIR / "metadata"
+output_dir = DATA_DIR / "metadata" / "kermany_2018"
 output_dir.mkdir(parents=True, exist_ok=True)
 output_path = output_dir / "catalog.csv"
 

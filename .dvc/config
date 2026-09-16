@@ -1,0 +1,4 @@
+[core]
+    autostage = true
+['remote "origin"']
+    url = https://dagshub.com/Habiburr0hman/cxr-engine.dvc

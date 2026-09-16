@@ -129,7 +129,7 @@ def balance_split_by_patients(
 
 def get_train_val_test_datasets_with_audit(
     image_dir: str | Path,
-    catalog_path: str | Path = "data/metadata/catalog.csv",
+    catalog_path: str | Path,
     val_size: float = 0.15,
     test_size: float = 0.15,
     batch_size: int = 32,

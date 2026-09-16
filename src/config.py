@@ -56,7 +56,7 @@ class ProjectConfig(FrozenBaseModel):
 
 
 class DataConfig(FrozenBaseModel):
-    catalog_path: Path = Path("data/metadata/catalog.csv")
+    catalog_path: Path = Path("data/metadata/kermany_2018/catalog.csv")
     variant: str
     image_height: int = Field(gt=0)
     image_width: int = Field(gt=0)
