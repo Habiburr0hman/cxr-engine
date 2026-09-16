@@ -1,0 +1,75 @@
+# Environment & Python Internals
+pyenv/
+.venv/
+venv/
+ENV/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Heavy Datasets (Raw & Preprocessed Image Arrays)
+data/raw/**
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+
+# Keep metadata catalog in Git for reproducibility
+data/metadata/*
+!data/metadata/*.csv
+!data/metadata/.gitkeep
+
+# MLflow Local Tracking & Local DBs
+mlruns/
+mlartifacts/
+.trash/
+mlflow.db
+mlflow.db.bak
+*.sqlite
+*.db
+
+# DVC local caches
+.dvc/cache
+.dvc/tmp
+
+# Artifacts & Checkpoints
+artifacts/
+*.keras
+*.h5
+*.tflite
+*.onnx
+
+# Secrets & Credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.yaml
+*.token
+*credentials.json
+
+# OS & IDE Artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing, Coverage, & Profiling
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# Development & testing scripts
+scripts/
+tests/

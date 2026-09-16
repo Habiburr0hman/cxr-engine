@@ -1,0 +1,21 @@
+project:
+  experiment_name: "cnn-medical-classification"
+  tracking_uri: "sqlite:///mlflow.db"
+  artifact_dir: "artifacts"
+  seed: 42
+
+data:
+  variant: "clahe_resized"
+  image_height: 256
+  image_width: 256
+  channels: 1
+  batch_size: 32
+  val_split: 0.15
+  test_split: 0.15
+
+model:
+  variant: "separable_resnet"
+
+training:
+  epochs: 25
+  learning_rate: 0.001
