@@ -1,8 +1,13 @@
 project:
   experiment_name: "cnn-medical-classification"
-  tracking_uri: "sqlite:///mlflow.db"
+  tracking_mode: "dagshub"
   artifact_dir: "artifacts"
-  seed: 42
+
+mlflow:
+  local:
+    tracking_uri: "sqlite:///mlflow.db"
+  dagshub:
+    tracking_uri: "https://dagshub.com/Habiburr0hman/cxr-engine.mlflow"
 
 data:
   variant: "clahe_resized"
@@ -17,5 +22,5 @@ model:
   variant: "separable_resnet"
 
 training:
-  epochs: 25
+  epochs: 1
   learning_rate: 0.001

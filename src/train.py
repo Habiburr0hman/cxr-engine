@@ -1,8 +1,7 @@
 # src/train.py
-from src.constants import SEED
-from src.utils import setup_reproducibility
+import src.reproducibility  # noqa: F401
 
-setup_reproducibility(SEED)
+# isort: split
 
 import hashlib
 import json
@@ -18,13 +17,12 @@ from mlflow.models.signature import infer_signature
 from src.config import AppConfig
 from src.dataset import get_train_val_test_datasets_with_audit
 from src.model import build_separable_resnet
+from src.tracking import setup_mlflow
 
 
 def run_training():
     config = AppConfig.load()
-
-    mlflow.set_tracking_uri(config.project.tracking_uri)
-    mlflow.set_experiment(config.project.experiment_name)
+    setup_mlflow(config)
 
     catalog_path = "data/metadata/catalog.csv"
     img_size = (config.data.image_height, config.data.image_width)
@@ -46,7 +44,6 @@ def run_training():
                 label_col="label",
                 patient_col="patient_id",
                 filename_col="filename",
-                random_state=SEED,
             )
         )
 
@@ -86,9 +83,7 @@ def run_training():
                     for k, v in config.training.model_dump(mode="json").items()
                 },
                 "sampling_strategy": "patient_aware_stratified_undersampling",
-                "patient_leakage_status": audit_report["leakage_verification"][
-                    "status"
-                ],
+                "patient_leakage_status": audit_report["leakage_verification"],
                 # Image counts (raw vs. balanced)
                 "images_train_raw": audit_report["image_counts"]["train"]["raw"],
                 "images_train_balanced": audit_report["image_counts"]["train"][
