@@ -8,6 +8,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from src.constants import SEED
+from src.utils import get_project_relative_path
 
 
 def parse_preprocessed_image(
@@ -243,10 +244,12 @@ def get_train_val_test_datasets_with_audit(
             str(k): int(v) for k, v in df[label_col].value_counts().sort_index().items()
         }
 
+    rel_catalog_path = get_project_relative_path(Path(catalog_path))
+    rel_image_dir = get_project_relative_path(Path(image_dir))
     audit_report = {
         "metadata": {
-            "catalog_path": str(catalog_path),
-            "image_dir": str(image_dir),
+            "catalog_path": str(rel_catalog_path),
+            "image_dir": str(rel_image_dir),
             "label_column": label_col,
             "patient_column": patient_col,
             "filename_column": filename_col,

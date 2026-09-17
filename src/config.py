@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
 
 from pydantic import (
     BaseModel,
@@ -42,6 +43,14 @@ class MLflowLocalConfig(FrozenBaseModel):
 class MLflowDagshubConfig(FrozenBaseModel):
     tracking_uri: str
 
+    @property
+    def web_repo_url(self) -> str:
+        return self.tracking_uri.removesuffix(".mlflow").rstrip("/")
+
+    @property
+    def repo_slug(self) -> str:
+        return urlparse(self.web_repo_url).path.strip("/")
+
 
 class MLflowConfig(FrozenBaseModel):
     local: MLflowLocalConfig = Field(default_factory=MLflowLocalConfig)
@@ -56,8 +65,9 @@ class ProjectConfig(FrozenBaseModel):
 
 
 class DataConfig(FrozenBaseModel):
-    catalog_path: Path = Path("data/metadata/kermany_2018/catalog.csv")
-    variant: str
+    source_name: str = "kermany_2018"
+    catalog_file: Path = "catalog.csv"
+    variant: str = "clahe_resized"
     image_height: int = Field(gt=0)
     image_width: int = Field(gt=0)
     channels: int = Field(gt=0)
@@ -69,7 +79,19 @@ class DataConfig(FrozenBaseModel):
 
     @property
     def processed_dir(self) -> Path:
-        return DATA_DIR / "processed" / f"{self.variant}"
+        return DATA_DIR / "processed" / self.source_name / self.variant
+
+    @property
+    def catalog_path(self) -> Path:
+        return DATA_DIR / "metadata" / self.source_name / self.catalog_file
+
+    @property
+    def dvc_pointer_path(self) -> Path:
+        return DATA_DIR / "processed" / self.source_name / f"{self.variant}.dvc"
+
+    @property
+    def raw_dvc_pointer_path(self) -> Path:
+        return DATA_DIR / "raw" / f"{self.source_name}.dvc"
 
 
 class ModelConfig(FrozenBaseModel):

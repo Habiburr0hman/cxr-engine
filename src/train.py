@@ -5,19 +5,23 @@ import src.reproducibility  # noqa: F401
 
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 
 import keras
 import mlflow
 import mlflow.tensorflow
 import numpy as np
+import pandas as pd
 import tensorflow as tf
+from mlflow.data.pandas_dataset import from_pandas
 from mlflow.models.signature import infer_signature
 
 from src.config import AppConfig
 from src.dataset import get_train_val_test_datasets_with_audit
 from src.model import build_separable_resnet
 from src.tracking import setup_mlflow
+from src.utils import get_dvc_hash, get_project_relative_path
 
 
 def run_training():
@@ -32,8 +36,46 @@ def run_training():
     test_split = config.data.test_split
     data_variant = config.data.variant
     img_dir = config.data.processed_dir
+    model_variant = config.model.variant
 
-    with mlflow.start_run(run_name="balanced_separable_resnet_run") as run:
+    variant_dvc_hash = get_dvc_hash(config.data.dvc_pointer_path) or "untracked"
+    raw_dvc_hash = get_dvc_hash(config.data.raw_dvc_pointer_path) or "untracked"
+
+    rel_img_dir = get_project_relative_path(img_dir)
+
+    run_name = (
+        f"{model_variant}_{data_variant}_{datetime.now().strftime('%Y%m%d_%H%M')}"
+    )
+    with mlflow.start_run(run_name=run_name) as run:
+        # 1. Track dataset and dvc binaries
+        mlflow.set_tags(
+            {
+                "data.source_name": config.data.source_name,
+                "data.variant": data_variant,
+                "data.processed_dvc_hash": variant_dvc_hash,
+                "data.raw_dvc_hash": raw_dvc_hash,
+                "data.processed_folder": rel_img_dir,
+            }
+        )
+
+        # 2. Register dataset catalog
+        rel_catalog_path = get_project_relative_path(catalog_path)
+        catalog_df = pd.read_csv(catalog_path)
+        source_uri = (
+            f"{config.mlflow.dagshub.web_repo_url}/src/main/{rel_catalog_path}"
+            if config.project.tracking_mode == "dagshub"
+            else rel_catalog_path
+        )
+        print(f"\n[MLFLOW SOURCE CHECK] -> {source_uri}\n")
+        mlflow_dataset = from_pandas(
+            df=catalog_df,
+            source=source_uri,
+            name=f"{config.data.source_name}_{data_variant}_v1",
+            targets=config.data.label_col,
+        )
+        mlflow.log_input(mlflow_dataset, context="training_and_evaluation")
+
+        # 3. Split dataset
         train_ds, val_ds, test_ds, audit_df, audit_report = (
             get_train_val_test_datasets_with_audit(
                 image_dir=img_dir,
@@ -47,6 +89,7 @@ def run_training():
             )
         )
 
+        # 4a. Log manifest
         manifest_dir = Path("artifacts/manifests")
         manifest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -130,7 +173,7 @@ def run_training():
                 ],
                 # Audit integrity hashes and paths
                 "manifest_sha256": sha256_hash,
-                "catalog_path": str(catalog_path),
+                "catalog_path": rel_catalog_path,
             }
         )
 
