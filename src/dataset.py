@@ -223,7 +223,9 @@ def get_train_val_test_datasets_with_audit(
 
     # 8. Robust audit tracking preserving exact original input catalog row order
     audit_df = raw_catalog_df.copy()
-    audit_df["run_status"] = "unassigned"
+    audit_df["cohort"] = "unassigned"
+    audit_df["status"] = "unassigned"
+    audit_df["split"] = "unassigned"
 
     split_tracking = [
         ("train", set(df_train_balanced[filename_col]), train_pt_set),
@@ -235,8 +237,14 @@ def get_train_val_test_datasets_with_audit(
         retained_mask = audit_df[filename_col].isin(retained_files)
         dropped_mask = is_in_split_pts & ~retained_mask
 
-        audit_df.loc[retained_mask, "run_status"] = f"{split_name}_retained"
-        audit_df.loc[dropped_mask, "run_status"] = f"{split_name}_dropped_undersampled"
+        # 1. Decoupled dimensions (Best Practice)
+        audit_df.loc[is_in_split_pts, "cohort"] = split_name
+        audit_df.loc[retained_mask, "status"] = "retained"
+        audit_df.loc[dropped_mask, "status"] = "dropped"
+
+        # 2. Simplified composite tag
+        audit_df.loc[retained_mask, "split"] = f"{split_name}_retained"
+        audit_df.loc[dropped_mask, "split"] = f"{split_name}_dropped"
 
     # 9. Audit summary
     def _get_class_dist(df: pd.DataFrame) -> dict[str, int]:
@@ -278,7 +286,7 @@ def get_train_val_test_datasets_with_audit(
                 "val": int(df_val_balanced[patient_col].nunique()),
                 "test": int(df_test_balanced[patient_col].nunique()),
             },
-            "dropped_undersampled": {
+            "dropped": {
                 "train": len(train_pt_set)
                 - int(df_train_balanced[patient_col].nunique()),
                 "val": len(val_pt_set) - int(df_val_balanced[patient_col].nunique()),
@@ -328,7 +336,7 @@ def get_train_val_test_datasets_with_audit(
         },
         "audit_status_breakdown": {
             str(k): int(v)
-            for k, v in audit_df["run_status"].value_counts().sort_index().items()
+            for k, v in audit_df["split"].value_counts().sort_index().items()
         },
     }
 

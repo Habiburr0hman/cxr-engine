@@ -1,7 +1,11 @@
+import keras
 import tensorflow as tf
 from keras import Model, layers
 
+from src.config import ModelConfig
 
+
+@keras.saving.register_keras_serializable()
 class DepthwiseSeparableResBlock(layers.Layer):
     """
     Residual block utilizing Depthwise Separable Convolutions.
@@ -115,3 +119,28 @@ def build_separable_resnet(input_shape=(256, 256, 1)):
 
     model = Model(inputs=inputs, outputs=outputs, name="separable_resnet")
     return model
+
+
+def get_model_complexity(model: tf.keras.Model) -> dict[str, int]:
+    trainable_count = sum(
+        tf.keras.backend.count_params(w) for w in model.trainable_weights
+    )
+    non_trainable_count = sum(
+        tf.keras.backend.count_params(w) for w in model.non_trainable_weights
+    )
+    return {
+        "params_total": trainable_count + non_trainable_count,
+        "params_trainable": trainable_count,
+        "params_non_trainable": non_trainable_count,
+        "layers_total": len(model.layers),
+    }
+
+
+def create_model(
+    model_config: ModelConfig, input_shape: tuple[int, int, int]
+) -> tf.keras.Model:
+    variant = model_config.variant.lower()
+    if variant == "separable_resnet":
+        return build_separable_resnet(input_shape=input_shape)
+    else:
+        raise ValueError(f"Unknown model variant '{variant}' in ModelConfig")

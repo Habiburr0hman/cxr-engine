@@ -1,6 +1,6 @@
 project:
   experiment_name: "exp"
-  tracking_mode: "dagshub"
+  tracking_mode: "local"
   artifact_dir: "artifacts"
 
 mlflow:
@@ -24,5 +24,5 @@ model:
   variant: "separable_resnet"
 
 training:
-  epochs: 1
+  epochs: 25
   learning_rate: 0.001
